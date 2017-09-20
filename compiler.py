@@ -1,6 +1,7 @@
 import ast
 import inspect
 import astor
+import textwrap
 
 ########
 ## IR ##
@@ -104,7 +105,7 @@ class PythonToSimple(ast.NodeVisitor):
 def Compile(f):
     """'Compile' the function f"""
     # Parse and extract the function definition AST
-    fun = ast.parse(inspect.getsource(f)).body[0]
+    fun = ast.parse(textwrap.dedent(inspect.getsource(f))).body[0]
     print(astor.dump(fun))
     
     simpleFun = PythonToSimple().visit(fun)
@@ -127,4 +128,4 @@ def test_it():
     
 if __name__ == '__main__':
     test_it()
-    
+
