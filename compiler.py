@@ -97,21 +97,55 @@ class PythonToSimple(ast.NodeVisitor):
         assert len(func.args.args) == 0 # TODO: handle functions with arguments 
 
         assert isinstance(func.body, list)
-        body = [self.visit(stmt) for stmt in func.body]
+        assert len(func.body) == 1 # TODO: handle function bodies with >1 Stmt
+        body = self.visit(func.body[0])
         
         return FuncDef(func.name, [], body)
+
+def Interpret(ir, *args):
+    assert isinstance(ir, FuncDef)
+    assert len(args) == 0 # TODO: you should handle functions with arguments
+    
+    # Initialize a symbol table, to store variable => value bindings
+    # TODO: fill this with the function arguments to start
+    syms = {}
+    
+    # Build a visitor to evaluate Exprs, using the symbol table to look up
+    # variable definitions
+    class EvalExpr(ast.NodeVisitor):
+        def __init__(self, symbolTable):
+            self.syms = symbolTable
+        
+        def visit_IntConst(self, node):
+            return node.val
+    
+    evaluator = EvalExpr(syms)
+    
+    # TODO: you will probably need to track more than just a single current
+    #       statement to deal with Blocks and nesting.
+    stmt = ir.body
+    while True:
+        assert isinstance(stmt, ast.AST)
+        if isinstance(stmt, Return):
+            return evaluator.visit(stmt.val)
+        else:
+            raise NotImplementedError("TODO: add support for the full IR")
 
 def Compile(f):
     """'Compile' the function f"""
     # Parse and extract the function definition AST
     fun = ast.parse(inspect.getsource(f)).body[0]
-    print(astor.dump(fun))
+    print("Python AST:\n{}\n".format(astor.dump(fun)))
     
     simpleFun = PythonToSimple().visit(fun)
     
-    print(astor.dump(simpleFun))
+    print("Simple IR:\n{}\n".format(astor.dump(simpleFun)))
     
-    return f
+    # package up our generated simple IR in a 
+    def run(*args):
+        return Interpret(simpleFun, *args)
+    
+    return run
 
 
 #############
@@ -123,8 +157,12 @@ def trivial() -> int:
     return 5
 
 def test_it():
-    Compile(trivial)
+    trivialInterpreted = Compile(trivial)
+    # run the original and our version, checking that their output matches:
+    assert trivial() == trivialInterpreted()
+    
+    # TODO: add more of your own tests which exercise the functionality
+    #       of your completed implementation
     
 if __name__ == '__main__':
     test_it()
-    
