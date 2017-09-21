@@ -126,7 +126,7 @@ To understand the Python AST, and how to build `ast.NodeVisitor`s, I highly reco
 
 Bonus: add explicit `NotImplemented` exceptions when attempting to translate non-translatable Python IR.
 
-### _Clarification:_
+### _Clarifications:_
 For loops in our simple IR take a different, simpler form than Python's for loop construct. (This is motivated both by simplicity, and by building something which will be useful once we are generating native code.) You should focus on lifting Python for loops of the form `for var in range([expr,] expr)`. `help(range)` if you're not very familiar with Python.
 
 Also, a design suggestion: the initial starter code release translated the list of statements in a Python `FunctionDef` AST node's body field into a `list` of statements in our `FuncDef`'s body field. However, it is likely to be cleaner and more uniform to only allow a single statement node to go in the body field. Lists of Stmts should only be contained within a `Block` node. Because the starter code does not translate Blocks, it now exclusively handles single-statement function bodies, and directly generates a `Return` node (with no enclosing list) when translating the `trivial` test function.
@@ -142,6 +142,9 @@ While implementing evaluation handlers for all of the remaining parts of the IR,
 2. How will you keep track of where you are in the execution of the program IR? The `EvalExpr` visitor implicitly tracks its location in an expression tree with the recursive call stack, but the main interpreter loop we've started (`while True…`) needs to explicitly keep track of where it is and where it should go next, including while traversing through nested statements like `Block`, `If`, and `For`. You probably need some kind of stack structure. (If you're new to Python, the regular `list` makes a good stack thanks to its `append` and `pop` methods.)
 
 You are free to implement this however you want—you can even tear out the interpreter loop entirely and build something recursive. What matters is that `Interpret(Compile(f), *args)` returns the same result as `f(*args)` for any reasonably expressible Python function `f`.
+
+## Step 3: Testing
+Our starter code includes a single trivial test: it `Compile`s the function `trivial`, and then `Interpret`s the result and compares it to the result of running the original Python function. While completing your implementation, you should add (lots of!) your own end-to-end tests like this. You won't be directly evaluated on your tests, but you need to think seriously about them to be sure you exercise all of the supported language features, logic, and design decisions in your implementation!
 
 ## Submission
 **_This assignment is due by 11:59pm on Friday, 9/29._**
