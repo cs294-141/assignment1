@@ -39,7 +39,7 @@ class Ref(ast.AST):
     _fields = ['name', 'index']
 
     def __init__(self, name, index=None):
-        return super(self, Ref).__init__(name, index)
+        super().__init__(name, index)
 
 class IntConst(ast.AST):
     _fields = ['val',]
@@ -58,7 +58,7 @@ class If(ast.AST):
     _fields = ['cond', 'body', 'elseBody']
     
     def __init__(self, cond, body, elseBody=None):
-        return super(self, If).__init__(cond, body, elseBody)
+        return super().__init__(cond, body, elseBody)
 
 class For(ast.AST):
     _fields = ['var', 'min', 'max', 'body']
