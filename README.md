@@ -126,11 +126,35 @@ To understand the Python AST, and how to build `ast.NodeVisitor`s, I highly reco
 
 Bonus: add explicit `NotImplemented` exceptions when attempting to translate non-translatable Python IR.
 
-## Step 2: Executing our IR (PENDING)
-To test this, and to exercise our skills working with tree-structured IRs, we will also build a simple interpreter for our IR, which we can execute and compare with the original.
+### _Clarifications:_
+For loops in our simple IR take a different, simpler form than Python's for loop construct. (This is motivated both by simplicity, and by building something which will be useful once we are generating native code.) You should focus on lifting Python for loops of the form `for var in range([expr,] expr)`. `help(range)` if you're not very familiar with Python.
 
-## Submission (PENDING)
-You should submit your code by forking this repository on GitHub. Precise instructions will follow.
+Also, a design suggestion: the initial starter code release translated the list of statements in a Python `FunctionDef` AST node's body field into a `list` of statements in our `FuncDef`'s body field. However, it is likely to be cleaner and more uniform to only allow a single statement node to go in the body field. Lists of Stmts should only be contained within a `Block` node. Because the starter code does not translate Blocks, it now exclusively handles single-statement function bodies, and directly generates a `Return` node (with no enclosing list) when translating the `trivial` test function.
+
+## Step 2: Executing our IR
+To test this, and to exercise our skills working with tree-structured IRs, we will also build a simple interpreter for our IR, which we can execute and compare with the original. The skeleton for this is defined in the `Interpret` function in the starter code.
+
+As in step 1, the starter code implements the bare minimum necessary to interpret the simple IR for the `trivial` test function. The skeleton includes another `ast.NodeVisitor` for recursively evaluating expressions, and an interpreter loop which runs statements until it reaches a `Return` node, whose value it then returns.
+
+While implementing evaluation handlers for all of the remaining parts of the IR, you will need to think about two things:
+
+1. How will you store the bindings between variable names and values? This is a job usually handled by a "symbol table," as alluded to in the starter code. In an interpreter, a symbol table maps names to concrete values, but the same pattern will be useful for tracking metadata about names once we start analyzing and compiling code. (Python's scoping semantics are extremely flat and dynamic, so you should be able to get by with a single, flat dictionary for your symbol table while interpreting or compiling a function.)
+2. How will you keep track of where you are in the execution of the program IR? The `EvalExpr` visitor implicitly tracks its location in an expression tree with the recursive call stack, but the main interpreter loop we've started (`while True…`) needs to explicitly keep track of where it is and where it should go next, including while traversing through nested statements like `Block`, `If`, and `For`. You probably need some kind of stack structure. (If you're new to Python, the regular `list` makes a good stack thanks to its `append` and `pop` methods.)
+
+You are free to implement this however you want—you can even tear out the interpreter loop entirely and build something recursive. What matters is that `Interpret(Compile(f), *args)` returns the same result as `f(*args)` for any reasonably expressible Python function `f`.
+
+## Step 3: Testing
+Our starter code includes a single trivial test: it `Compile`s the function `trivial`, and then `Interpret`s the result and compares it to the result of running the original Python function. While completing your implementation, you should add (lots of!) your own end-to-end tests like this. You won't be directly evaluated on your tests, but you need to think seriously about them to be sure you exercise all of the supported language features, logic, and design decisions in your implementation!
+
+## Submission
+**_This assignment is due by 11:59pm on Friday, 9/29._**
+
+You should submit your code via GitHub Classroom. If you already did work in a manually-created fork, I suggest:
+
+1. Merging the updates from this master repository, if necessary.
+2. Copying your `compiler.py` (and anything else you've created) over top of a fresh checkout from the repo created when you join the assignment on GitHub Classroom.
+
+My apologies for the extra steps for those of you who have already started. Let me know if you have any trouble.
 
 [2]:	http://llvm.org
 [3]:	https://numba.pydata.org
