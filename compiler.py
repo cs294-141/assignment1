@@ -682,8 +682,14 @@ def LessTrivial(c, d):
         a = 12 * a
         b = 3.14 * a * a
     if a < 36:
+        if a < 50:
+            return False
         return True
     else:
+        if a > 50:
+            if a > 75:
+                return 9000
+            return 5000
         return "Something else"
 
 if __name__ == '__main__':

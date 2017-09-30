@@ -225,6 +225,23 @@ def If():
         return 7
 
 
+def If_Nested(a, b, c):
+    if a > b:
+        if c > a:
+            return c
+        elif a > c:
+            return a
+        else:
+            # Ha, you thought this was a 'max' function!
+            return b
+    else:
+        if c > b:
+            return c
+        elif c < b:
+            return a
+    return 0
+
+
 def For_OneArgumentRange():
     x = 0
     for i in range(2):
@@ -242,9 +259,17 @@ def For_TwoArgumentRange():
 
 def For_ThreeArgumentRange():
     x = 0
-    for i in range (0, 2, 2):
+    for i in range(0, 2, 2):
         x = x + i
     return x
+
+def For_Nested():
+    a = 0
+    for i in range(2):
+        for y in range(3):
+            for z in range(5):
+                a += i * y * z
+    return a
 
 
 def LessTrivial() -> int:
@@ -362,9 +387,13 @@ def BinOp_Mult_Param(a, b):
     return a * b
 
 def BinOp_Div_Param(a, b):
+    if b == 0:
+        return 0
     return a / b
 
 def BinOp_Mod_Param(a, b):
+    if b == 0:
+        return 0
     return a % b
 
 def CmpOp_Eq_Param(a, b):
