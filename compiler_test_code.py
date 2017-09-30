@@ -263,6 +263,14 @@ def For_ThreeArgumentRange():
         x = x + i
     return x
 
+
+def For_Nested_Arg(a):
+    for i in range(5):
+        for z in range(5):
+            a = a + i * z
+    return a
+
+
 def For_Nested():
     a = 0
     for i in range(2):

@@ -1,14 +1,13 @@
 # Submission Notes
 
-There doesn't seem to be any requirement for comments, documentation or even a report, so I'll add a few notes here:
+There doesn't seem to be any requirement for comments, documentation or even a report, so I've commented where it felt necessary and I'll add some notes here:
 
-- Please run the tests with `python3.6 compiler_test.py`.
+- Please run the tests with `python3.6 compiler_test.py`. This executes tests on functions defined in `compiler_test_code.py`.
 
-You should hopefully see what I see:
+You should hopefully see what I see (after _some time_):
 
 ```
-----------------------------------------------------------------------
-Ran 4007 tests in 71.459s
+Ran 4163 tests in 76.808s
 
 OK
 ```

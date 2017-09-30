@@ -117,9 +117,9 @@ class If(ast.AST):
 class For(ast.AST):
     _fields = ['var', 'min', 'max', 'body', 'step']
 
-    def __init__(self, var, min, max, body, step, executed=False):
-        # We don't want 'executed' to be treated like other IR node fields.
-        self.executed = executed
+    def __init__(self, var, min, max, body, step, executing=False):
+        # We don't want 'executing' to be treated like other IR node fields.
+        self.executing = executing
         super().__init__(var, min, max, body, step)
 
 
@@ -549,7 +549,7 @@ def Interpret(ir, *args):
     # TODO(aryap): It would be nice to include line number information when
     # parsing the IR so that we can yield info about source code errors when
     # interpreting.
-    
+
     stack = []
     stack.append(ir.body)
     while stack:
@@ -615,7 +615,7 @@ def Interpret(ir, *args):
             # the index variable by one step. This avoids a bunch of conditional
             # logic to avoid updating the symbol table if the test fails.
             index_symbol = statement.var.name.val
-            if not statement.executed:
+            if not statement.executing:
                 index_value = evaluator.visit(statement.min)
                 if index_value >= evaluator.visit(statement.max):
                     # Corner case: loop is done before it ever executes. Python
@@ -623,10 +623,14 @@ def Interpret(ir, *args):
                     # case.
                     continue
                 syms[index_symbol] = evaluator.visit(statement.min)
-                statement.executed = True
+                statement.executing = True
             else:
                 index_value = syms[index_symbol]
                 if index_value >= evaluator.visit(statement.max):
+                    # This is a bit of a hack. It means we can re-use the same
+                    # loop object when there's an outer loop and re-initialise
+                    # the index variable.
+                    statement.executing = False
                     # Undo the last step to mimic 'range' behaviour (see NOTE).
                     stack.append(Assign(ref=statement.var, val=BinOp(
                         ast.Sub(), statement.var, statement.step)))
@@ -659,11 +663,14 @@ def BuildIR(f):
     # Parse and extract the function definition AST
     parsed = ast.parse(inspect.getsource(f)).body[0]
 
-    print("Python AST:\n{}\n".format(astor.dump(parsed)))
+    # NOTE(aryap): These are extremely useful but make tests slow; leaving
+    # commented (which is bad practice, I know I know).
+    # print("Python AST:\n{}\n".format(astor.dump(parsed)))
     
     simple_ir = PythonToSimple().visit(parsed)
     
-    print("Simple IR:\n{}\n".format(astor.dump(simple_ir)))
+    # NOTE(aryap): As above.
+    # print("Simple IR:\n{}\n".format(astor.dump(simple_ir)))
     return simple_ir
 
 
