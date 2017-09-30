@@ -268,7 +268,7 @@ def For_Nested():
     for i in range(2):
         for y in range(3):
             for z in range(5):
-                a += i * y * z
+                a = a + i * y * z
     return a
 
 
