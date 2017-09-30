@@ -41,6 +41,7 @@ ACCEPTABLE_IR_CLASSES = set([
     type(None)
 ])
 
+
 class CompilerTest(unittest.TestCase):
     """Test fixture
     

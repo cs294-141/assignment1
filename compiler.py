@@ -1,8 +1,7 @@
 import ast
 import inspect
-import astor
 
-from optparse import OptionParser
+import astor
 
 ########
 ## IR ##
@@ -55,11 +54,14 @@ Stmt = Assign(Ref ref, Expr val)
 class BinOp(ast.AST):
     _fields = ['op', 'left', 'right']
 
+
 class CmpOp(ast.AST):
     _fields = ['op', 'left', 'right']
 
+
 class UnOp(ast.AST):
     _fields = ['op', 'e']
+
 
 class Ref(ast.AST):
     _fields = ['name', 'index']
@@ -67,34 +69,43 @@ class Ref(ast.AST):
     def __init__(self, name, index=None):
         super().__init__(name, index)
 
+
 class IntConst(ast.AST):
     _fields = ['val',]
+
 
 class FloatConst(ast.AST):
     _fields = ['val',]
 
+
 class StrConst(ast.AST):
     _fields = ['val',]
 
+
 class NamedConst(ast.AST):
     _fields = ['name',]
+
 
 # Add a 'List' type so we can^W should handle variables with indices.
 class List(ast.AST):
     _fields = ['values',]
 
+
 ## Stmts ##
 class Assign(ast.AST):
     _fields = ['ref', 'val']
 
+
 class Block(ast.AST):
     _fields = ['body',]
+
 
 class If(ast.AST):
     _fields = ['cond', 'body', 'elseBody']
     
     def __init__(self, cond, body, elseBody=None):
-        return super().__init__(cond, body, elseBody)
+        super().__init__(cond, body, elseBody)
+
 
 class For(ast.AST):
     _fields = ['var', 'min', 'max', 'body', 'step']
@@ -104,8 +115,10 @@ class For(ast.AST):
         self.executed = executed
         super().__init__(var, min, max, body, step)
 
+
 class Return(ast.AST):
     _fields = ['val',]
+
 
 class FuncDef(ast.AST):
     _fields = ['name', 'args', 'body', 'defaults']
@@ -118,11 +131,14 @@ class FuncDef(ast.AST):
         self.captured_symbols = None
         super().__init__(name, args, body, defaults)
 
+
 class Call(ast.AST):
     _fields = ['name', 'args']
 
+
 class UndefinedSymbolError(Exception):
     pass
+
 
 class PythonToSimple(ast.NodeVisitor):
     """Translate a Python AST to our simplified IR.
@@ -144,7 +160,7 @@ class PythonToSimple(ast.NodeVisitor):
                      right=self.visit(node.right))
 
     def visit_BoolOp(self, node):
-        """Boolean operations are awkward.
+        R"""Boolean operations are awkward.
 
         An expression like "return (e and d or True) or (False and 7) or 3"
         will be parsed according to the logical order of operations into a
@@ -208,8 +224,6 @@ class PythonToSimple(ast.NodeVisitor):
 
         But doing this way means a depth-first post-order traversal will
         evaluate the expression left-to-right.
-
-        TODO(aryap): Better alternatives?
         """
         op_val_chain = list(zip(node.ops, node.comparators))
 
@@ -266,25 +280,25 @@ class PythonToSimple(ast.NodeVisitor):
 
     def visit_Num(self, node):
         if isinstance(node.n, int):
-            # TODO(aryap): Don't use named keyword maybe?
             return IntConst(val=node.n)
         elif isinstance(node.n, float):
             return FloatConst(val=node.n)
         else:
             raise NotImplementedError(
-                "TODO: Implement support for Num type: %s" % type(node.n))
+                "Missing support for Num type: %s" % type(node.n))
 
     def visit_Str(self, node):
         return StrConst(node.s)
 
     def visit_For(self, node):
-        # TODO(aryap): What to do about the 'orelse' block, which consists of
-        # code run normally, when the For loop doesn't exit through a break
-        # statement?
+        # NOTE(aryap): Our simplified IR seems to omit 'break' statements
+        # (likewise continue statements) so the 'orelse' block doesn't make
+        # much sense.
         body_block = Block(body=[
             self.visit(stmt) for stmt in node.body + node.orelse])
-        # TODO(aryap): For and Assign can assign to multiple variables. Wait,
-        # can they?
+
+        # NOTE(aryap): For and Assign can assign to multiple variables, but
+        # omit that functionality in our IR too.
 
         # We have to reduce the iterator called in the Python for loop to a
         # simplified range bounded by min and max values (iterators will be
@@ -331,7 +345,6 @@ class PythonToSimple(ast.NodeVisitor):
     def visit_FunctionDef(self, func):
         assert isinstance(func.body, list)
         statements = [self.visit(stmt) for stmt in func.body]
-        # TODO(aryap): Use of 'Block' is unclear.
         body = Block(body=statements) if statements else None
         
         assert func.args is not None, "Function has no 'arguments' object."
@@ -497,8 +510,6 @@ class EvalExpr(ast.NodeVisitor):
         target = self.visit(node.name)
         return Interpret(target, *args)
 
-    # TODO(aryap): Same with for, if, etc. This evaluator only deals with
-    # Exprs. 
     def generic_visit(self, node):
         raise NotImplementedError(
             "EvalExpr does not understand %s" % type(node))
@@ -526,8 +537,9 @@ def Interpret(ir, *args):
     for i, arg in enumerate(ir.args):
         syms[arg.val] = args[i] if i < len(args) else defaults[i]
 
-    # TODO(aryap): Track progress through program. Use it to emit help in
-    # errors.
+    # TODO(aryap): It would be nice to include line number information when
+    # parsing the IR so that we can yield info about source code errors when
+    # interpreting.
     
     stack = []
     stack.append(ir.body)
@@ -628,10 +640,11 @@ def Interpret(ir, *args):
 
         else:
             raise NotImplementedError(
-                "TODO: add support for the full IR: %s" % type(statement))
+                "Interpreter still doesn't understand: %s" % type(statement))
 
     # No return statement in body, hence return value is None.
     return None
+
 
 def BuildIR(f):
     # Parse and extract the function definition AST
@@ -654,14 +667,10 @@ def Compile(f):
     return run
 
 
-def LessTrivial():
-    pass
-
-
 if __name__ == '__main__':
-    # TODO(aryap): User interface?
-    print("NO!")
-    less_trivial_interpreted = Compile(LessTrivial)
-    print(less_trivial_interpreted())
-    
-    print(LessTrivial())
+    print("Please run compiler_test.py instead.")
+
+    # Fiddle code
+    # less_trivial_interpreted = Compile(LessTrivial)
+    # print(less_trivial_interpreted())
+    # print(LessTrivial())

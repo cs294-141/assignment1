@@ -30,6 +30,7 @@ Stmt = [...]
 def trivial() -> int:
     return 5
 
+
 def Stmt_Assign():
     """Test basic assignment of literals to variables.
 
@@ -42,27 +43,33 @@ def Stmt_Assign():
     d = True
     e = False
 
+
 def Stmt_Assign_Var():
     """Test assignment of variables to each other."""
     b = 1
     a = b
 
+
 def Stmt_Return_Float() -> float:
     """Test that we can return floats."""
     return 3.2
+
 
 def Stmt_Return_Int() -> int:
     """Test that we can return ints."""
     return 25
 
+
 def Stmt_Return_Str() -> str:
     """Test that we can return the wisdom of our elders."""
     return "my heart will go on"
+
 
 def Stmt_FuncDef():
     """Test that we can define profound functions."""
     def InnerFunction(important, arguments):
         return important + arguments
+
 
 def BinOp_Add() -> float:
     """Add numbers."""
@@ -72,6 +79,7 @@ def BinOp_Add() -> float:
     d = a + b
     return d + b
 
+
 def BinOp_Sub() -> float:
     """Subtract numbers."""
     a = 1
@@ -79,6 +87,7 @@ def BinOp_Sub() -> float:
     c = b - a
     d = 6.2 - 3.2
     return d - c
+
 
 def BinOp_Mul() -> float:
     """Multiply numbers."""
@@ -89,6 +98,7 @@ def BinOp_Mul() -> float:
     e = a * 0.99
     return c * d * e
 
+
 def BinOp_Div() -> float:
     """Divide numbers."""
     a = 14.0
@@ -97,10 +107,12 @@ def BinOp_Div() -> float:
     d = 99/11.1
     return d / c
 
+
 def BinOp_Mod() -> int:
     """Mod this."""
     r = 5 % 3
     return r
+
 
 def BinOp_And() -> bool:
     a = True and True
@@ -110,6 +122,7 @@ def BinOp_And() -> bool:
     e = a and b and c and d
     return d and e
 
+
 def BinOp_Or() -> bool:
     a = False or False
     b = False or True
@@ -117,6 +130,7 @@ def BinOp_Or() -> bool:
     d = True or True
     e = a or b or d or c
     return e or a
+
 
 def BinOp_Chains():
     """Test compound operator expressions."""
@@ -127,46 +141,55 @@ def BinOp_Chains():
     e = b * (b + 3.33) * c - 68 * 14.2
     return a + b * c / e - e and d
 
+
 def CmpOp_Eq():
     a = 1 == 2.3
     b = 2 == 2
     return a == b
+
 
 def CmpOp_Ne():
     a = 1 != 2.3
     b = 2 != 2
     return a != b
 
+
 def CmpOp_Lt():
     a = 1 < 2.3
     b = 2 < 2
     return a < b
+
 
 def CmpOp_Gt():
     a = 1 > 2.3
     b = 2 > 2
     return a > b
 
+
 def CmpOp_Le():
     a = 1 <= 2.3
     b = 2 <= 2
     return a <= b
+
 
 def CmpOp_Ge():
     a = 1 >= 2.3
     b = 2 >= 2
     return a >= b
 
+
 def UnOp_Neg():
     a = -1
     b = -a
     return -a
+
 
 def UnOp_Not():
     a = True
     b = not True
     c = not a
     return not b or not a
+
 
 def Op_Chains():
     a = 2.0
@@ -178,6 +201,7 @@ def Op_Chains():
     g = a or not b or c or not a
     return f == True
 
+
 def If():
     if 1 > 2:
         return True
@@ -186,6 +210,7 @@ def If():
     else:
         return 7
 
+
 def For_OneArgumentRange():
     x = 0
     for i in range(2):
@@ -193,17 +218,20 @@ def For_OneArgumentRange():
         x = x + i
     return x
 
+
 def For_TwoArgumentRange():
     x = 0
     for i in range(4, 9):
         x = x + i
     return x
 
+
 def For_ThreeArgumentRange():
     x = 0
     for i in range (0, 2, 2):
         x = x + i
     return x
+
 
 def LessTrivial() -> int:
     some_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -221,13 +249,16 @@ def LessTrivial() -> int:
             a = a * a
     return (e and d or True) or (False and 7) or 3
 
+
 def AddStrings():
     a = "abc"
     b = "def"
     return a + b + "foo"
 
+
 def Sum_WithDefaults(a, b, c=2):
     return a + b + c + 2
+
 
 def If_WithArgs(a, b):
     a = 1
@@ -239,6 +270,7 @@ def If_WithArgs(a, b):
         d = 24
     return d
 
+
 def For_WithArgs(a, b, c=9):
     upper = a * b * c
     a = 0
@@ -246,15 +278,18 @@ def For_WithArgs(a, b, c=9):
         a = a + 5
     return a + i
 
+
 def For_IndexVariableFinalState(a, b):
     for i in range(5):
         a = None
     return i
 
+
 def FunctionCall():
     def Add(a, b):
         return a + b
     return Add(1, 2)
+
 
 def TurtlesAllTheWayDown(i):
     def TurtleA(a):
@@ -265,10 +300,12 @@ def TurtlesAllTheWayDown(i):
         return TurtleB(a) + 1
     return TurtleA(i) + 1
 
+
 def Lists_Basic():
     a = [1, 2, 3, 4]
     a[1] = a[2] + 3
     return a[1]
+
 
 def Lists_Parameterised(size):
     a = [1] * size
@@ -276,10 +313,12 @@ def Lists_Parameterised(size):
         return a[0]
     return None
 
+
 def ListOfLists():
     a = [1, 2, 3]
     a[1] = [1, 2, 4]
     return a[1][2]
+
 
 def Fibonacci():
     def f(a):
