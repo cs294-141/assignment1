@@ -1,3 +1,21 @@
+# Submission Notes
+
+There doesn't seem to be any requirement for comments, documentation or even a report, so I've commented where it felt necessary and I'll add some notes here:
+
+- Please run the tests with `python3.6 compiler_test.py`. This executes tests on functions defined in `compiler_test_code.py`.
+
+You should hopefully see what I see (after _some time_):
+
+```
+Ran 4163 tests in 76.808s
+
+OK
+```
+
+- I took a few liberties with our intermediate IR to come up with a more complete subset of the language. I felt gross at points having to shuffle between Python native types, `ast` types, and our types. So for example the simple IR also managed `StrConst`s and `NamedConst`s. It also handles array indexing (even multidimensionally).
+- I had to add a bastardised notion of scoping to get Fibonacci to work. Sorry, Python.
+- I ran out of creative steam for the tests so resorted to brute force. It actually seems feasible to generate the minimum combination of types the tree can support (limiting multiplicities to 1), but that didn't feel like a good test. Instead, basic operations are tested, as are the range of small "simple" functions that can combine `if`s and `for`s.
+
 # CS294-141: Building your first compiler
 For the next few weeks, we will be working through a project to build a basic compiler. In doing this, we will gain experience with several useful tools for practical compiler development (namely, the [Python AST library][pyast] for embedded front-end development, and [LLVM][2] for back-end code generation). Along the way we will also encounter common data structures, patterns, and idioms in building compilers and DSLs.
 
