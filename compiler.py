@@ -20,12 +20,19 @@ import astor
 # The operators (Uop, Bop, Cop) are represented by the classes from the ast
 # module:
 #   Neg -> ast.USub
-#   Not -> 
+#   Not -> ast.Not
+#   LE -> ast.LtE
+#   GE -> ast.GtE
+#   etc.
 #
 # Others are more obvious:
+#   Add -> ast.Add
 #   Mul -> ast.Mult
 #   LT -> ast.Lt
+#   GT -> ast.Gt
 #   etc.
+#
+# The full mapping is encoded in the Interpret function.
 """
 Expr = BinOp(Bop op, Expr left, Expr right)
      | CmpOp(Cop op, Expr left, Expr right)
@@ -302,11 +309,13 @@ class PythonToSimple(ast.NodeVisitor):
 
         # We have to reduce the iterator called in the Python for loop to a
         # simplified range bounded by min and max values (iterators will be
-        # over [min, max). To that end we must understand two different
+        # over [min, max). To that end we must understand three different
         # signatures for 'range()':
         #
         # range(stop)           var from 0 to less than stop
         # range(start, stop)    var from start to less than stop
+        # range(start, stop, step)  var from start to less than stop in
+        #                           incrementes of size step
         start = None
         final = IntConst(0)
         fn_call = node.iter
@@ -666,11 +675,18 @@ def Compile(f):
         return Interpret(simple_ir, *args)
     return run
 
+@Compile
+def LessTrivial(c, d):
+    a = c * d
+    for i in range(5):
+        a = 12 * a
+        b = 3.14 * a * a
+    if a < 36:
+        return True
+    else:
+        return "Something else"
 
 if __name__ == '__main__':
+    print("This is a basic smoke test. Please run compiler_test.py instead.")
+    print(LessTrivial(.5, .5))
     print("Please run compiler_test.py instead.")
-
-    # Fiddle code
-    # less_trivial_interpreted = Compile(LessTrivial)
-    # print(less_trivial_interpreted())
-    # print(LessTrivial())

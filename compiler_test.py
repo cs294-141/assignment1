@@ -50,9 +50,45 @@ class CompilerTest(unittest.TestCase):
     """
 
     def testIR_StmtAssign(self):
+        """
+        It is boring to hand-craft expected or "golden" IRs that we expect
+        for each part of the ADT. There is much more value in comparing the
+        output of the interpreted functions to the those run by the python
+        interpreter itself; we don't really care what the IR looks like along
+        the way as long as our interfaces are consistent. Nevertheless, here is
+        just such a test.
+        """
         ir = compiler.BuildIR(compiler_test_code.Stmt_Assign_Var)
-        # TODO(aryap): Make this more useful. Compare it to what you'd expect
-        # the IR to actually be.
+
+        self.assertTrue(isinstance(ir, compiler.FuncDef))
+        self.assertTrue(isinstance(ir.body, compiler.Block))
+
+        body = ir.body.body
+        self.assertIsNone(body[0])  # The doc-string ast.Expr is a nothing.
+        assignment_0 = body[1]
+        self.assertTrue(isinstance(assignment_0, compiler.Assign))
+        self.assertTrue(isinstance(assignment_0.ref, compiler.Ref))
+        self.assertTrue(isinstance(assignment_0.ref.name, compiler.StrConst))
+        self.assertTrue(isinstance(assignment_0.val, compiler.IntConst))
+        self.assertEquals('b', assignment_0.ref.name.val)
+        self.assertEquals(1, assignment_0.val.val)
+        self.assertIsNone(assignment_0.ref.index)
+        assignment_1 = body[2]
+        self.assertTrue(isinstance(assignment_1, compiler.Assign))
+        self.assertTrue(isinstance(assignment_1.ref, compiler.Ref))
+        self.assertTrue(isinstance(assignment_1.ref.name, compiler.StrConst))
+        self.assertTrue(isinstance(assignment_1.val, compiler.Ref))
+        self.assertTrue(isinstance(assignment_1.val.name, compiler.StrConst))
+        self.assertEquals('a', assignment_1.ref.name.val)
+        self.assertEquals('b', assignment_1.val.name.val)
+        self.assertIsNone(assignment_1.ref.index)
+        self.assertIsNone(assignment_1.val.index)
+        return_statement = body[3]
+        self.assertTrue(isinstance(return_statement, compiler.Return))
+        self.assertTrue(isinstance(return_statement.val, compiler.Ref))
+        self.assertTrue(
+            isinstance(return_statement.val.name, compiler.StrConst))
+        self.assertEquals('a', return_statement.val.name.val)
 
 
 def CreateSanityCheckFunction(func):
@@ -144,13 +180,29 @@ def LoadSanityCheckCases(cls):
         # 3. Check that compiling and interpreting every function yields the
         # same result as running it in Python itself.
 
-        # But first generate fake arguments (that are always ints) where needed.
-        fake_args = [random.randint(0, 100)
-                     for _ in inspect.signature(func).parameters]
-        interpret_check = CreateCompareToInterpreted(func, *fake_args)
-        interpret_check.__name__ = (
-            "testInterpretResultsEqualNativeResults_%s" % func.__name__)
-        setattr(cls, interpret_check.__name__, interpret_check)
+        for t in range(50):
+            # But first generate fake arguments (that are always ints) where
+            # needed.
+            fake_args = [random.randint(0, 100)
+                         for _ in inspect.signature(func).parameters]
+            interpret_check = CreateCompareToInterpreted(func, *fake_args)
+            interpret_check.__name__ = (
+                "testInterpretedResults_int_%s_%d" % (func.__name__, t))
+            setattr(cls, interpret_check.__name__, interpret_check)
+
+        # Some of the tests we'd also like to throw floats at. But not all
+        # (e.g. you can't extend a list by multiplying it by a float).
+        if (func.__name__.startswith('BinOp') or
+            func.__name__.startswith('CmpOp')):
+            for t in range(50):
+                # But first generate fake arguments (that are always ints)
+                # where needed.
+                fake_args = [random.uniform(0, 100)
+                             for _ in inspect.signature(func).parameters]
+                interpret_check = CreateCompareToInterpreted(func, *fake_args)
+                interpret_check.__name__ = (
+                    "testInterpretedResults_float_%s_%d" % (func.__name__, t))
+                setattr(cls, interpret_check.__name__, interpret_check)
 
 
 if __name__ == '__main__':

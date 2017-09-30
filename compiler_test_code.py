@@ -5,9 +5,12 @@ This is the goal IR ADT:
 Expr = BinOp(Bop op, Expr left, Expr right)
      | CmpOp(Cop op, Expr left, Expr right)
      | UnOp(Uop op, Expr e)
-     | Ref(Str name, Expr? index)
+     | Ref(Ref base | StrConst name, Expr? index)
      | FloatConst(float val)
      | IntConst(int val)
+     | StrConst(str val)
+     | NamedConst(str name)
+     | Call(Ref name, Expr* args)
 
 Uop = Neg | Not
 Bop = Add | Sub | Mul | Div | Mod | And | Or
@@ -16,14 +19,22 @@ Cop =  EQ |  NE |  LT |  GT |  LE | GE
 Stmt = Assign(Ref ref, Expr val)
      | Block(Stmt* body)
      | If(Expr cond, Block body, Block? elseBody)
-     | For(Str var, Expr min, Expr max, Block body)
+     | For(StrConst var, Expr min, Expr max, Block body, Expr step)
      | Return(Expr val)
-     | FuncDef(Str name, Str* args, Stmt body)
+     | FuncDef(StrConst name, StrConst* args, Stmt body)
+     | Call(Ref name, Expr* args)
 
-We also want to test these generalisations:
-Stmt = [...]
-     | If(Expr cond, Block body, Block? elseBody)
-     | For(Str var, Expr min, Expr max, Block body)
+The structure of this file is as follows. We start with basic tests of trivial
+functionality like returning a literal, assigning to a value, returning a
+value, and so on. We test the Five basic literal constant types: int, float,
+str, bool, NoneType.
+
+We then compose functionality more and more until the test functions at the
+end.
+
+These functions are automatically tested. Where functions have parameters, the
+callers randomly (but deterministically) generate inputs to make sure the
+results agree with those of the python interpreter.
 """
 
 # Define a trivial test program to start
@@ -42,12 +53,15 @@ def Stmt_Assign():
     c = "celine dion"
     d = True
     e = False
+    f = None
+    return c
 
 
 def Stmt_Assign_Var():
     """Test assignment of variables to each other."""
     b = 1
     a = b
+    return a
 
 
 def Stmt_Return_Float() -> float:
@@ -274,6 +288,7 @@ def If_WithArgs(a, b):
 def For_WithArgs(a, b, c=9):
     upper = a * b * c
     a = 0
+    i = 0
     for i in range(upper):
         a = a + 5
     return a + i
@@ -329,3 +344,43 @@ def Fibonacci():
     for i in range(10):
         d = d + f(i)
     return d
+
+def Negate(some_number):
+    return -some_number
+
+def DoNot(a):
+    a = False
+    return not a
+
+def BinOp_Add_Param(a, b):
+    return a + b
+
+def BinOp_Sub_Param(a, b):
+    return a - b
+
+def BinOp_Mult_Param(a, b):
+    return a * b
+
+def BinOp_Div_Param(a, b):
+    return a / b
+
+def BinOp_Mod_Param(a, b):
+    return a % b
+
+def CmpOp_Eq_Param(a, b):
+    return a == b
+
+def CmpOp_Ne_Param(a, b):
+    return a != b
+
+def CmpOp_Lt_Param(a, b):
+    return a < b
+
+def CmpOp_Gt_Param(a, b):
+    return a > b
+
+def CmpOp_Le_Param(a, b):
+    return a <= b
+
+def CmpOp_Ge_Param(a, b):
+    return a >= b
